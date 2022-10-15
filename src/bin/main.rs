@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use bevy_editor_pls::controls;
+use bevy_editor_pls::prelude::*;
+// use bevy_editor_pls_default_windows::hierarchy::picking::EditorRayCastSource;
 use bevy_rapier3d::prelude::*;
 use darkest::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin, Jumper, Player};
 use smooth_bevy_cameras::LookTransformPlugin;
@@ -9,6 +12,9 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         // .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugins(DefaultPlugins)
+        .add_plugin(EditorPlugin)
+        .insert_resource(editor_controls())
+        .add_startup_system(set_cam3d_controls)
         .add_plugin(LookTransformPlugin)
         .add_plugin(FpsCameraPlugin::default())
         .add_startup_system(setup)
@@ -41,6 +47,8 @@ fn setup(
     });
 
     // player camera
+    let player_position = (-2.0, 1.0, 5.0);
+    let jump_impulse = 3.0;
     commands
         .spawn_bundle(Camera3dBundle::default())
         .insert_bundle(FpsCameraBundle::new(
@@ -48,17 +56,15 @@ fn setup(
                 translate_sensitivity: 0.1,
                 ..Default::default()
             },
-            Vec3::new(-2.0, 1.0, 5.0),
+            Vec3::new(player_position.0, player_position.1, player_position.2),
             Vec3::new(0., 0., 0.),
         ))
         .insert(Velocity {
             linvel: Vec3::new(0.0, 0.0, 0.0),
             angvel: Vec3::new(0.0, 0.0, 0.0),
         })
-        .insert(Ccd::enabled())
-        .insert(Collider::ball(0.5))
         .insert(Jumper {
-            jump_impulse: 1.,
+            jump_impulse,
             is_jumping: false,
         })
         .insert(Player);
@@ -69,7 +75,7 @@ fn setup(
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: player_size })),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+            transform: Transform::from_xyz(player_position.0, player_position.1, player_position.2),
             ..Default::default()
         })
         .insert(RigidBody::Dynamic)
@@ -83,12 +89,40 @@ fn setup(
             angvel: Vec3::new(0.0, 0.0, 0.0),
         })
         .insert(Ccd::enabled())
-        .insert(GravityScale(0.5))
         .insert(Restitution::coefficient(0.7))
         .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(Jumper {
-            jump_impulse: 3.0,
+            jump_impulse,
             is_jumping: false,
         })
         .insert(Player);
+}
+
+fn editor_controls() -> controls::EditorControls {
+    let mut editor_controls = controls::EditorControls::default_bindings();
+    editor_controls.unbind(controls::Action::PlayPauseEditor);
+
+    editor_controls.insert(
+        controls::Action::PlayPauseEditor,
+        controls::Binding {
+            input: controls::UserInput::Single(controls::Button::Keyboard(KeyCode::Escape)),
+            conditions: vec![controls::BindingCondition::ListeningForText(false)],
+        },
+    );
+
+    editor_controls
+}
+
+fn set_cam3d_controls(
+    mut query: Query<
+        &mut bevy_editor_pls::default_windows::cameras::camera_3d_free::FlycamControls,
+    >,
+) {
+    let mut controls = query.single_mut();
+    controls.key_up = KeyCode::Numpad1;
+    controls.key_down = KeyCode::Numpad0;
+    controls.key_left = KeyCode::Left;
+    controls.key_right = KeyCode::Right;
+    controls.key_forward = KeyCode::Up;
+    controls.key_back = KeyCode::Down;
 }

@@ -6,6 +6,7 @@ use bevy::{
     transform::components::Transform,
     window::Windows,
 };
+use bevy_editor_pls::EditorState;
 use bevy_rapier3d::{dynamics::Velocity, pipeline::CollisionEvent};
 use serde::{Deserialize, Serialize};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, Smoother};
@@ -80,6 +81,55 @@ pub enum ControlEvent {
     TranslateEye(Vec3),
 }
 
+pub fn default_input_map(
+    mut events: EventWriter<ControlEvent>,
+    keyboard: Res<Input<KeyCode>>,
+    mut mouse_motion_events: EventReader<MouseMotion>,
+    controllers: Query<&FpsCameraController>,
+) {
+    // Can only control one camera at a time.
+    let controller = if let Some(controller) = controllers.iter().find(|c| c.enabled) {
+        controller
+    } else {
+        return;
+    };
+    let FpsCameraController {
+        translate_sensitivity,
+        mouse_rotate_sensitivity,
+        ..
+    } = *controller;
+
+    let mut cursor_delta = Vec2::ZERO;
+    for event in mouse_motion_events.iter() {
+        cursor_delta += event.delta;
+    }
+
+    events.send(ControlEvent::Rotate(
+        mouse_rotate_sensitivity * cursor_delta,
+    ));
+
+    let mut speed_mod = 1.0;
+    if keyboard.pressed(KeyCode::LShift) {
+        speed_mod = 2.0;
+    }
+
+    for (key, dir) in [
+        (KeyCode::W, Vec3::Z),
+        (KeyCode::A, Vec3::X),
+        (KeyCode::S, -Vec3::Z),
+        (KeyCode::D, -Vec3::X),
+    ]
+    .iter()
+    .cloned()
+    {
+        if keyboard.pressed(key) {
+            events.send(ControlEvent::TranslateEye(
+                speed_mod * translate_sensitivity * dir,
+            ));
+        }
+    }
+}
+
 fn player_jumps(
     keyboard_input: Res<Input<KeyCode>>,
     mut players: Query<(&mut Jumper, &mut Velocity), With<Player>>,
@@ -134,6 +184,7 @@ impl FpsCameraBundle {
 pub fn control_system(
     mut events: EventReader<ControlEvent>,
     mut cameras: Query<(&FpsCameraController, &mut LookTransform)>,
+    mut players: Query<(&Player, &mut Transform)>,
 ) {
     // Can only control one camera at a time.
     let mut transform = if let Some((_, transform)) = cameras.iter_mut().find(|c| c.0.enabled) {
@@ -159,7 +210,11 @@ pub fn control_system(
             }
             ControlEvent::TranslateEye(delta) => {
                 // Translates up/down (Y) left/right (X) and forward/back (Z).
-                transform.eye += delta.x * rot_x + delta.y * rot_y + delta.z * rot_z;
+                let translation = delta.x * rot_x + delta.y * rot_y + delta.z * rot_z;
+                transform.eye += translation;
+                for (_player, mut transform) in players.iter_mut() {
+                    transform.translation += translation;
+                }
             }
         }
     }
@@ -173,10 +228,11 @@ fn grab_cursor(
     mut windows: ResMut<Windows>,
     btn: Res<Input<MouseButton>>,
     key: Res<Input<KeyCode>>,
+    editor: Res<EditorState>,
 ) {
     let window = windows.get_primary_mut().unwrap();
 
-    if btn.just_pressed(MouseButton::Left) {
+    if btn.just_pressed(MouseButton::Left) && !editor.active {
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     }
@@ -184,54 +240,5 @@ fn grab_cursor(
     if key.just_pressed(KeyCode::Escape) {
         window.set_cursor_lock_mode(false);
         window.set_cursor_visibility(true);
-    }
-}
-
-pub fn default_input_map(
-    mut events: EventWriter<ControlEvent>,
-    keyboard: Res<Input<KeyCode>>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    controllers: Query<&FpsCameraController>,
-) {
-    // Can only control one camera at a time.
-    let controller = if let Some(controller) = controllers.iter().find(|c| c.enabled) {
-        controller
-    } else {
-        return;
-    };
-    let FpsCameraController {
-        translate_sensitivity,
-        mouse_rotate_sensitivity,
-        ..
-    } = *controller;
-
-    let mut cursor_delta = Vec2::ZERO;
-    for event in mouse_motion_events.iter() {
-        cursor_delta += event.delta;
-    }
-
-    events.send(ControlEvent::Rotate(
-        mouse_rotate_sensitivity * cursor_delta,
-    ));
-
-    let mut speed_mod = 1.0;
-    if keyboard.pressed(KeyCode::LShift) {
-        speed_mod = 2.0;
-    }
-
-    for (key, dir) in [
-        (KeyCode::W, Vec3::Z),
-        (KeyCode::A, Vec3::X),
-        (KeyCode::S, -Vec3::Z),
-        (KeyCode::D, -Vec3::X),
-    ]
-    .iter()
-    .cloned()
-    {
-        if keyboard.pressed(key) {
-            events.send(ControlEvent::TranslateEye(
-                speed_mod * translate_sensitivity * dir,
-            ));
-        }
     }
 }
