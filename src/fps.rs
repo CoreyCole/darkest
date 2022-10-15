@@ -207,6 +207,10 @@ pub fn control_system(
                 // Rotates with pitch and yaw.
                 look_angles.add_yaw(-delta.x);
                 look_angles.add_pitch(-delta.y);
+                for (_player, mut transform) in players.iter_mut() {
+                    let quat = Quat::from_rotation_y(delta.x);
+                    transform.rotate(quat);
+                }
             }
             ControlEvent::TranslateEye(delta) => {
                 // Translates up/down (Y) left/right (X) and forward/back (Z).

@@ -38,7 +38,11 @@ fn setup(
         })
         .insert(RigidBody::Fixed)
         .insert(Ccd::enabled())
-        .insert(Collider::cuboid(ground_size, ground_height, ground_size));
+        .insert(Collider::cuboid(
+            ground_size / 2.0,
+            ground_height,
+            ground_size / 2.0,
+        ));
 
     // light
     commands.spawn_bundle(PointLightBundle {
@@ -47,8 +51,10 @@ fn setup(
     });
 
     // player camera
-    let player_position = (-2.0, 1.0, 5.0);
-    let jump_impulse = 3.0;
+    let player_size = 7.0;
+    let player_position = Vec3::new(0.0, player_size / 2.0 + 1.0, 0.0);
+    let looking_at = Vec3::new(20.0, player_size / 2.0, 0.0);
+    let jump_impulse = 5.0;
     commands
         .spawn_bundle(Camera3dBundle::default())
         .insert_bundle(FpsCameraBundle::new(
@@ -56,8 +62,8 @@ fn setup(
                 translate_sensitivity: 0.1,
                 ..Default::default()
             },
-            Vec3::new(player_position.0, player_position.1, player_position.2),
-            Vec3::new(0., 0., 0.),
+            player_position,
+            looking_at,
         ))
         .insert(Velocity {
             linvel: Vec3::new(0.0, 0.0, 0.0),
@@ -70,12 +76,11 @@ fn setup(
         .insert(Player);
 
     // player model
-    let player_size = 1.0;
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: player_size })),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(player_position.0, player_position.1, player_position.2),
+            transform: Transform::from_xyz(player_position.x, player_position.y, player_position.z),
             ..Default::default()
         })
         .insert(RigidBody::Dynamic)
@@ -89,7 +94,7 @@ fn setup(
             angvel: Vec3::new(0.0, 0.0, 0.0),
         })
         .insert(Ccd::enabled())
-        .insert(Restitution::coefficient(0.7))
+        .insert(Restitution::coefficient(-10.0))
         .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(Jumper {
             jump_impulse,
