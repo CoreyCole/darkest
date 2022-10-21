@@ -136,7 +136,7 @@ fn player_jumps(
 ) {
     for (mut jumper, mut velocity) in players.iter_mut() {
         if keyboard_input.pressed(KeyCode::Space) && !jumper.is_jumping {
-            velocity.linvel = Vec3::new(0., jumper.jump_impulse, 0.).into();
+            velocity.linvel = Vec3::new(0., jumper.jump_impulse, 0.);
             jumper.is_jumping = true;
         }
     }
