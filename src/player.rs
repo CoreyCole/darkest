@@ -2,6 +2,7 @@ use crate::config::{JUMP_IMPULSE, LOOKING_AT, LOOK_TRANSLATE_SENS, PLAYER_POSITI
 use crate::weapon::{spawn_weapon, WeaponType};
 use bevy::{
     app::prelude::*,
+    core::Name,
     ecs::{bundle::Bundle, prelude::*},
     input::{mouse::MouseMotion, prelude::*},
     math::prelude::*,
@@ -85,8 +86,24 @@ pub enum ControlEvent {
     TranslateEye(Vec3),
 }
 
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_player)
+            .add_system(modify_body_locked_flags);
+    }
+}
+
+/* Lock translations and/or rotations inside of a system. */
+fn modify_body_locked_flags(mut locked_axes: Query<&mut LockedAxes>) {
+    for mut locked_axes in locked_axes.iter_mut() {
+        *locked_axes = LockedAxes::ROTATION_LOCKED;
+    }
+}
+
 /// player model
-pub fn spawn_player(
+fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -116,6 +133,8 @@ pub fn spawn_player(
             jump_impulse: JUMP_IMPULSE,
             is_jumping: false,
         })
+        .insert(LockedAxes::TRANSLATION_LOCKED | LockedAxes::ROTATION_LOCKED_X)
+        .insert(Name::new("Player"))
         .insert(Player)
         .with_children(|parent| {
             // weapon

@@ -5,7 +5,7 @@ use bevy_editor_pls::prelude::*;
 use bevy_rapier3d::prelude::*;
 use darkest::editor_pls::EditorPlsPlugin;
 use darkest::npc::spawn_npcs;
-use darkest::player::{spawn_player, FpsCameraPlugin};
+use darkest::player::{FpsCameraPlugin, PlayerPlugin};
 use darkest::world::world;
 use smooth_bevy_cameras::LookTransformPlugin;
 
@@ -20,8 +20,8 @@ fn main() {
         .add_plugin(LookTransformPlugin)
         .add_plugin(FpsCameraPlugin::default())
         .add_plugin(EditorPlsPlugin)
+        .add_plugin(PlayerPlugin)
         .add_startup_system(world)
         .add_startup_system(spawn_npcs)
-        .add_startup_system(spawn_player)
         .run();
 }

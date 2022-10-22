@@ -1,7 +1,9 @@
 use crate::config::{NPC_POSITION, NPC_RESTITUTION, PLAYER_SIZE};
 use crate::weapon::{spawn_weapon, WeaponType};
+use bevy::core::Name;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+
 #[derive(Component)]
 pub struct Npc;
 
@@ -34,6 +36,7 @@ pub fn spawn_npcs(
         .insert(Ccd::enabled())
         .insert(Restitution::coefficient(NPC_RESTITUTION))
         .insert(Npc)
+        .insert(Name::new("NPC"))
         .with_children(|parent| {
             parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
         });
