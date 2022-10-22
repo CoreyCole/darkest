@@ -9,7 +9,7 @@ pub const PLAYER_SIZE: f32 = 7.0;
 /// Players spawn position
 pub const PLAYER_POSITION: Vec3 = Vec3::new(0.0, PLAYER_SIZE / 2.0 + 1.0, 0.0);
 /// Distance from player to place weapon
-pub const WEAPON_Z_OFFSET: f32 = -1.0 * PLAYER_SIZE / 2.0;
+pub const WEAPON_Z_OFFSET: f32 = PLAYER_SIZE;
 /// NPC spawn position
 pub const NPC_POSITION: Vec3 = Vec3::new(GROUND_SIZE / 4.0, PLAYER_POSITION.y, PLAYER_POSITION.z);
 /// NPC restitution

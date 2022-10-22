@@ -1,7 +1,7 @@
-use crate::config::{AXE_ASSET_PATH, NPC_POSITION, NPC_RESTITUTION, PLAYER_SIZE, WEAPON_Z_OFFSET};
+use crate::config::{NPC_POSITION, NPC_RESTITUTION, PLAYER_SIZE};
+use crate::weapon::{spawn_weapon, WeaponType};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-
 #[derive(Component)]
 pub struct Npc;
 
@@ -14,7 +14,6 @@ pub fn spawn_npcs(
     ass: Res<AssetServer>,
 ) {
     // NPC
-    let axe = ass.load(AXE_ASSET_PATH);
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: PLAYER_SIZE })),
@@ -36,29 +35,6 @@ pub fn spawn_npcs(
         .insert(Restitution::coefficient(NPC_RESTITUTION))
         .insert(Npc)
         .with_children(|parent| {
-            parent
-                .spawn_bundle(SceneBundle {
-                    scene: axe,
-                    transform: Transform::from_xyz(0.0, 0.0, WEAPON_Z_OFFSET),
-                    ..Default::default()
-                })
-                // .insert(RigidBody::Dynamic)
-                .insert(Npc);
+            parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
         });
-    // weapon
-    /* let scene = ass.load(AXE_ASSET_PATH);
-    let weapon = commands
-        .spawn_bundle(SceneBundle {
-            scene,
-            transform: Transform::from_xyz(
-                NPC_POSITION.x,
-                NPC_POSITION.y,
-                NPC_POSITION.z - WEAPON_Z_OFFSET,
-            ),
-            ..Default::default()
-        })
-        .insert(RigidBody::Fixed)
-        .insert(Npc)
-        .id();
-    commands.entity(npc).push_children(weapon); */
 }

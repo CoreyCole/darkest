@@ -1,12 +1,16 @@
+use crate::config::{JUMP_IMPULSE, LOOKING_AT, LOOK_TRANSLATE_SENS, PLAYER_POSITION, PLAYER_SIZE};
+use crate::weapon::{spawn_weapon, WeaponType};
 use bevy::{
     app::prelude::*,
     ecs::{bundle::Bundle, prelude::*},
     input::{mouse::MouseMotion, prelude::*},
     math::prelude::*,
+    prelude::*,
     transform::components::Transform,
     window::Windows,
 };
 use bevy_editor_pls::EditorState;
+use bevy_rapier3d::prelude::*;
 use bevy_rapier3d::{dynamics::Velocity, pipeline::CollisionEvent};
 use serde::{Deserialize, Serialize};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, Smoother};
@@ -79,6 +83,55 @@ impl Default for FpsCameraController {
 pub enum ControlEvent {
     Rotate(Vec2),
     TranslateEye(Vec3),
+}
+
+/// player model
+pub fn spawn_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    ass: Res<AssetServer>,
+) {
+    commands
+        .spawn_bundle(PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube { size: PLAYER_SIZE })),
+            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+            transform: Transform::from_xyz(PLAYER_POSITION.x, PLAYER_POSITION.y, PLAYER_POSITION.z),
+            ..Default::default()
+        })
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::cuboid(
+            PLAYER_SIZE / 2.0,
+            PLAYER_SIZE / 2.0,
+            PLAYER_SIZE / 2.0,
+        ))
+        .insert(Velocity {
+            linvel: Vec3::new(0.0, 0.0, 0.0),
+            angvel: Vec3::new(0.0, 0.0, 0.0),
+        })
+        .insert(Ccd::enabled())
+        .insert(Restitution::coefficient(-10.0))
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(Jumper {
+            jump_impulse: JUMP_IMPULSE,
+            is_jumping: false,
+        })
+        .insert(Player)
+        .with_children(|parent| {
+            // weapon
+            parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
+            // camera
+            parent
+                .spawn_bundle(Camera3dBundle::default())
+                .insert_bundle(FpsCameraBundle::new(
+                    FpsCameraController {
+                        translate_sensitivity: LOOK_TRANSLATE_SENS,
+                        ..Default::default()
+                    },
+                    PLAYER_POSITION,
+                    LOOKING_AT,
+                ));
+        });
 }
 
 pub fn default_input_map(
@@ -208,14 +261,14 @@ pub fn control_system(
                 look_angles.add_yaw(-delta.x);
                 look_angles.add_pitch(-delta.y);
                 for (_player, mut transform) in players.iter_mut() {
-                    let quat = Quat::from_rotation_y(delta.x);
+                    let quat = Quat::from_rotation_y(-delta.x);
                     transform.rotate(quat);
                 }
             }
             ControlEvent::TranslateEye(delta) => {
                 // Translates up/down (Y) left/right (X) and forward/back (Z).
                 let translation = delta.x * rot_x + delta.y * rot_y + delta.z * rot_z;
-                transform.eye += translation;
+                // transform.eye += translation;
                 for (_player, mut transform) in players.iter_mut() {
                     transform.translation += translation;
                 }
