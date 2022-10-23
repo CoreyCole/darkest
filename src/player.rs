@@ -138,7 +138,17 @@ fn spawn_player(
         .insert(Player)
         .with_children(|parent| {
             // weapon
-            parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
+            parent
+                .spawn_bundle(spawn_weapon(WeaponType::Axe, &ass))
+                .insert(RigidBody::Fixed)
+                .insert(Name::new("Weapon"))
+                .insert(Collider::ball(PLAYER_SIZE / 10.0))
+                /* .insert_bundle(TransformBundle::from(Transform::from_xyz(
+                    0.0,
+                    PLAYER_SIZE / 2., // translate collider to melee weapon hitbox
+                    0.0,
+                ))) */
+                .insert(Ccd::enabled());
             // camera
             parent
                 .spawn_bundle(Camera3dBundle::default())
