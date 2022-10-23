@@ -16,10 +16,16 @@ pub fn spawn_npcs(
     ass: Res<AssetServer>,
 ) {
     // NPC
+    let scene = ass.load("npc.glb#Scene0");
     commands
-        .spawn_bundle(PbrBundle {
+        /* .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: PLAYER_SIZE })),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+            transform: Transform::from_xyz(NPC_POSITION.x, NPC_POSITION.y, NPC_POSITION.z),
+            ..Default::default()
+        }) */
+        .spawn_bundle(SceneBundle {
+            scene,
             transform: Transform::from_xyz(NPC_POSITION.x, NPC_POSITION.y, NPC_POSITION.z),
             ..Default::default()
         })
@@ -36,8 +42,8 @@ pub fn spawn_npcs(
         .insert(Ccd::enabled())
         .insert(Restitution::coefficient(NPC_RESTITUTION))
         .insert(Npc)
-        .insert(Name::new("NPC"))
-        .with_children(|parent| {
+        .insert(Name::new("NPC"));
+        /* .with_children(|parent| {
             parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
-        });
+        }); */
 }
