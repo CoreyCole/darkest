@@ -1,0 +1,58 @@
+# 3ds Max Wavefront OBJ Exporter v0.94b - (c)2007 guruware
+# File Created: 07.12.2014 22:59:56
+
+newmtl Wood1
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\Leandro\Desktop\TradeTent.fbm\Wood1.tga
+	map_Kd C:\Users\Leandro\Desktop\TradeTent.fbm\Wood1.tga
+
+newmtl Flag
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\Leandro\Desktop\TradeTent.fbm\Flag.tga
+	map_Kd C:\Users\Leandro\Desktop\TradeTent.fbm\Flag.tga
+
+newmtl Wood2
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\Leandro\Desktop\TradeTent.fbm\Wood.tga
+	map_Kd C:\Users\Leandro\Desktop\TradeTent.fbm\Wood.tga
+
+newmtl Metal
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\Leandro\Desktop\TradeTent.fbm\Metal.tga
+	map_Kd C:\Users\Leandro\Desktop\TradeTent.fbm\Metal.tga
