@@ -11,6 +11,8 @@ use bevy_asset_loader::prelude::*;
 use derive_more::Display;
 use iyes_progress::{ProgressCounter, ProgressPlugin};
 
+const LOADING_PRINT_INTERVAL: usize = 250;
+
 #[derive(AssetCollection)]
 pub struct Scenes {
     #[asset(path = "npc.glb#Scene0")]
@@ -28,14 +30,7 @@ pub fn get_asset(
     ass_type: AssetType,
 ) -> Handle<Scene> {
     match ass_type {
-        AssetType::Npc => {
-            // ass.load(scenes.npc.lo.id());
-            // ass.load(scenes.npc.as_weak().id.into());
-            scenes.npc.clone()
-        } /* e => {
-              error!("AssetType not handled: {e}");
-              ass.npc.clone()
-          }, */
+        AssetType::Npc => scenes.npc.clone(),
     }
 }
 
@@ -54,18 +49,9 @@ impl Plugin for AssetsPlugin {
         // continue to GameState::InGame when complete
         .add_plugin(ProgressPlugin::new(GameState::AssetLoading).continue_to(GameState::InGame))
         .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(expect))
-        /* .add_system_set(
-            SystemSet::on_update(GameState::AssetLoading)
-                .with_system(track_fake_long_task.before(print_progress)),
-        ) */
         .add_system(print_progress);
     }
 }
-
-// Time in seconds to complete a custom long-running task.
-// If assets are loaded earlier, the current state will not
-// be changed until the 'fake long task' is completed (thanks to 'iyes_progress')
-// const DURATION_LONG_TASK_IN_SECS: f64 = 2.0;
 
 fn expect(
     mut commands: Commands,
@@ -83,31 +69,28 @@ fn expect(
     spawn_player(&mut commands, &mut meshes, &mut materials, &ass, &scenes);
 }
 
-/* fn track_fake_long_task(time: Res<Time>, progress: Res<ProgressCounter>) {
-    if time.seconds_since_startup() > DURATION_LONG_TASK_IN_SECS {
-        info!("Long task is completed");
-        progress.manually_track(true.into());
-    } else {
-        progress.manually_track(false.into());
-    }
-} */
-
 fn print_progress(
     progress: Option<Res<ProgressCounter>>,
     diagnostics: Res<Diagnostics>,
     mut last_done: Local<u32>,
 ) {
     if let Some(progress) = progress.map(|counter| counter.progress()) {
-        if progress.done > *last_done {
-            *last_done = progress.done;
+        let frame = diagnostics
+            .get(FrameTimeDiagnosticsPlugin::FRAME_COUNT)
+            .map(|diagnostic| diagnostic.value().unwrap_or(0.))
+            .unwrap_or(0.);
+        if frame % LOADING_PRINT_INTERVAL as f64 == 0. {
             info!(
-                "[Frame {}] Changed progress: {:?}",
+                "[Frame {}] loading...",
                 diagnostics
                     .get(FrameTimeDiagnosticsPlugin::FRAME_COUNT)
                     .map(|diagnostic| diagnostic.value().unwrap_or(0.))
                     .unwrap_or(0.),
-                progress
             );
+        }
+        if progress.done > *last_done {
+            *last_done = progress.done;
+            info!("[Frame {}] Changed progress: {:?}", frame, progress);
         }
     }
 }
