@@ -1,5 +1,6 @@
-use crate::config::{AXE_ASSET_PATH, WEAPON_Z_OFFSET};
+use crate::config::WEAPON_Z_OFFSET;
 use bevy::prelude::*;
+pub const AXE_ASSET_PATH: &str = "battleaxe.glb#Scene0";
 
 pub enum WeaponType {
     Axe,

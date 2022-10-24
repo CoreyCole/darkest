@@ -1,5 +1,6 @@
+use crate::assets::{get_asset, AssetType, Scenes};
 use crate::config::{NPC_POSITION, NPC_RESTITUTION, PLAYER_SIZE};
-use crate::weapon::{spawn_weapon, WeaponType};
+// use crate::weapon::{spawn_weapon, WeaponType};
 use bevy::core::Name;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -9,23 +10,11 @@ pub struct Npc;
 
 /// Loads the NPC 3D asset (GTLF)
 /// https://bevy-cheatbook.github.io/3d/gltf.html
-pub fn spawn_npcs(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    ass: Res<AssetServer>,
-) {
+pub fn spawn_npcs(commands: &mut Commands, ass: &Res<AssetServer>, scenes: &Res<Scenes>) {
     // NPC
-    let scene = ass.load("npc.glb#Scene0");
     commands
-        /* .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: PLAYER_SIZE })),
-            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(NPC_POSITION.x, NPC_POSITION.y, NPC_POSITION.z),
-            ..Default::default()
-        }) */
         .spawn_bundle(SceneBundle {
-            scene,
+            scene: get_asset(ass, scenes, AssetType::Npc),
             transform: Transform::from_xyz(NPC_POSITION.x, NPC_POSITION.y, NPC_POSITION.z),
             ..Default::default()
         })
@@ -43,7 +32,7 @@ pub fn spawn_npcs(
         .insert(Restitution::coefficient(NPC_RESTITUTION))
         .insert(Npc)
         .insert(Name::new("NPC"));
-        /* .with_children(|parent| {
-            parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
-        }); */
+    /* .with_children(|parent| {
+        parent.spawn_bundle(spawn_weapon(WeaponType::Axe, &ass));
+    }); */
 }

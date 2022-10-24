@@ -1,3 +1,4 @@
+use crate::assets::Scenes;
 use crate::config::{JUMP_IMPULSE, LOOKING_AT, LOOK_TRANSLATE_SENS, PLAYER_POSITION, PLAYER_SIZE};
 use crate::weapon::{spawn_weapon, WeaponType};
 use bevy::{
@@ -90,8 +91,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
-            .add_system(modify_body_locked_flags);
+        app.add_system(modify_body_locked_flags);
     }
 }
 
@@ -103,11 +103,12 @@ fn modify_body_locked_flags(mut locked_axes: Query<&mut LockedAxes>) {
 }
 
 /// player model
-fn spawn_player(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    ass: Res<AssetServer>,
+pub fn spawn_player(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    ass: &Res<AssetServer>,
+    _scenes: &Res<Scenes>,
 ) {
     commands
         .spawn_bundle(PbrBundle {

@@ -1,12 +1,14 @@
+use crate::assets::Scenes;
 use crate::config::{GROUND_HEIGHT, GROUND_SIZE, LIGHT_HEIGHT};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 /// set up a 3D scene
-pub fn world(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+pub fn spawn_world(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    _scenes: &Res<Scenes>,
 ) {
     // plane
     commands
