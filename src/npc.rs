@@ -10,11 +10,11 @@ pub struct Npc;
 
 /// Loads the NPC 3D asset (GTLF)
 /// https://bevy-cheatbook.github.io/3d/gltf.html
-pub fn spawn_npcs(commands: &mut Commands, ass: &Res<AssetServer>, scenes: &Res<Scenes>) {
+pub fn spawn_npcs(commands: &mut Commands, scenes: &Res<Scenes>) {
     // NPC
     commands
         .spawn_bundle(SceneBundle {
-            scene: get_asset(ass, scenes, AssetType::Npc),
+            scene: get_asset(scenes, AssetType::Npc),
             transform: Transform::from_xyz(NPC_POSITION.x, NPC_POSITION.y, NPC_POSITION.z),
             ..Default::default()
         })

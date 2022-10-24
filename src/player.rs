@@ -107,8 +107,7 @@ pub fn spawn_player(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    ass: &Res<AssetServer>,
-    _scenes: &Res<Scenes>,
+    scenes: &Res<Scenes>,
 ) {
     commands
         .spawn_bundle(PbrBundle {
@@ -140,7 +139,7 @@ pub fn spawn_player(
         .with_children(|parent| {
             // weapon
             parent
-                .spawn_bundle(spawn_weapon(WeaponType::Axe, &ass))
+                .spawn_bundle(spawn_weapon(WeaponType::Axe, scenes))
                 .insert(RigidBody::Fixed)
                 .insert(Name::new("Weapon"))
                 .insert(Collider::ball(PLAYER_SIZE / 10.0))

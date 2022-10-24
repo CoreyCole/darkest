@@ -17,20 +17,24 @@ const LOADING_PRINT_INTERVAL: usize = 250;
 pub struct Scenes {
     #[asset(path = "npc.glb#Scene0")]
     npc: Handle<Scene>,
+    #[asset(path = "npc.glb#walk")]
+    npc_walk: Handle<Scene>,
+    #[asset(path = "battleaxe.glb#Scene0")]
+    axe: Handle<Scene>,
 }
 
 #[derive(Display, Debug)]
 pub enum AssetType {
+    Axe,
     Npc,
+    NpcWalk,
 }
 
-pub fn get_asset(
-    _ass: &Res<AssetServer>,
-    scenes: &Res<Scenes>,
-    ass_type: AssetType,
-) -> Handle<Scene> {
+pub fn get_asset(scenes: &Res<Scenes>, ass_type: AssetType) -> Handle<Scene> {
     match ass_type {
+        AssetType::Axe => scenes.axe.clone(),
         AssetType::Npc => scenes.npc.clone(),
+        AssetType::NpcWalk => scenes.npc_walk.clone(),
     }
 }
 
@@ -64,9 +68,9 @@ fn expect(
     info!("spawning world");
     spawn_world(&mut commands, &mut meshes, &mut materials, &scenes);
     info!("spawning NPCs");
-    spawn_npcs(&mut commands, &ass, &scenes);
+    spawn_npcs(&mut commands, &scenes);
     info!("spawning player");
-    spawn_player(&mut commands, &mut meshes, &mut materials, &ass, &scenes);
+    spawn_player(&mut commands, &mut meshes, &mut materials, &scenes);
 }
 
 fn print_progress(
